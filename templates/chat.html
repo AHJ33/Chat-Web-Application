@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" 
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" 
+    crossorigin="anonymous">
+</script>
+{% endblock %}
+
+{% block content %}
+<h5 id="online_list" class="card-header text-center">Chat</h5>
+
+<div id="card_body" class="card-body px-5 py-0" style="height: calc(100vh - 92px - 83px); display: flex; flex-direction: column; justify-content: space-between;">
+    <div id="all_messages" class="container" style="max-height: 90%; overflow-y: auto; overflow-x: hidden;"></div>
+    <div id="message_input" class="input-group my-3">
+        <input type="text" class="form-control" placeholder="Message" id="message" autofocus>
+        <button class="btn btn-outline-secondary" id="button-addon2" onClick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var socketio = io();
+
+    const sendMessage = () => {
+        const message = document.getElementById("message");
+        if (message.value == "") return;
+        socketio.emit("message", { data: message.value });
+        message.value = "";
+    };
+
+    const all_messages_element = document.getElementById("all_messages");
+
+    const createMessage = (name, msg) => {
+
+        var display_name = "{{ display_name }}";
+        var html_content = "";
+        
+        if (name == display_name) {
+            html_content = `
+            <div class="row">
+
+                <div class="col"></div>
+
+                <div class="border border-secondary rounded m-4 col-8">
+                    <div class="card-body">
+                        <h6 class="card-title d-flex justify-content-end">${name}</h6>
+                        <p class="card-text d-flex justify-content-end">${msg}</p>
+                    </div>
+                </div>
+
+            </div> 
+            `;
+        } else {
+        html_content = `
+            <div class="row">
+                <div class="border border-secondary rounded m-4 col-8">
+                    <div class="card-body">
+                        <h6 class="card-title">${name}</h6>
+                        <p class="card-text">${msg}</p>
+                    </div>
+
+                    <div class="col"></div>
+                </div>
+            </div>
+            `;
+        }
+
+        all_messages_element.innerHTML += html_content;
+
+        all_messages_element.scrollTop = all_messages_element.scrollHeight;
+    };
+
+    socketio.on("message", (data) => {
+        createMessage(data.name, data.message)
+    });
+
+    document.getElementById("message").onkeypress=function(e){
+        if(e.keyCode==13){
+            document.getElementById("button-addon2").click();
+        }
+    };
+</script>
+
+{% for msg in messages %}
+<script type="text/javascript">
+    createMessage("{{ msg.name }}", "{{ msg.message }}");
+</script>
+{% endfor %}
+{% endblock %}        

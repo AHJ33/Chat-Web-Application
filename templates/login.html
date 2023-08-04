@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf%}
+
+
+{% block content %}
+<h5 class="card-header text-center">Log In</h5>
+
+<div class="card-body px-5 py-0" style="height: 100%;">
+    <form method="POST" action="{{ url_for('home') }}" novalidate>
+        {{ form.csrf_token }}
+            <div class="input-group my-3">
+                {{ form.display_name(type="text", class_="form-control", placeholder="Name")}}
+                {{ form.submit(class_="btn btn-outline-secondary", id="button-addon2", type="submit") }}
+            </div>
+            <div>
+                {% for error in form.display_name.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
